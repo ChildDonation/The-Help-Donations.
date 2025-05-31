@@ -27,7 +27,6 @@ app.post('/create-checkout-session', async (req, res) => {
       quantity: 1,
     }],
     mode: 'payment',
-    // KORIJAN: itilize backticks!
     success_url: `${req.protocol}://${req.get('host')}/success.html`,
     cancel_url: `${req.protocol}://${req.get('host')}/cancel.html`,
   });
@@ -37,6 +36,5 @@ app.post('/create-checkout-session', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  // KORIJAN: itilize backticks!
   console.log(`Server is running on port ${PORT}`);
 });
