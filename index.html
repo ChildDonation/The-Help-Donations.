@@ -41,16 +41,20 @@
       color: #f1c40f;
       font-weight: 500;
     }
-    select, .btn-donate {
+    select, .btn-donate, #customAmount {
       font-size: 1.1em;
       border-radius: 8px;
       padding: 12px 18px;
       margin-bottom: 22px;
       border: none;
     }
-    select {
-      margin-bottom: 25px;
+    select, #customAmount {
       color: #111;
+      width: 250px;
+    }
+    #customAmount {
+      display: none;
+      margin-bottom: 22px;
     }
     .btn-donate {
       background: #f1c40f;
@@ -59,6 +63,7 @@
       transition: background 0.3s;
       box-shadow: 0 2px 8px rgba(241,196,15,0.12);
       cursor: pointer;
+      width: 250px;
     }
     .btn-donate:hover {
       background: #d4ac0d;
@@ -72,27 +77,59 @@
       .logo-img { max-width: 98vw; }
       h1 { font-size: 2em; }
       p { font-size: 1em; }
+      select, .btn-donate, #customAmount { width: 96vw;}
     }
   </style>
 </head>
 <body>
   <div class="overlay">
-    <!-- Imgw ap monte depi public/banner.jpg -->
     <img class="logo-img" src="banner.jpg" alt="Banner">
     <h1>OPEN DONATION</h1>
-    <p>Fè kè w kontan! Chwazi kantite lajan w vle bay epi ede nou fè yon diferans. Tout donasyon trete ak sekirite atravè Stripe.</p>
-    <form action="/create-checkout-session" method="POST">
-      <select name="amount" required>
+    <p>Fè kè w kontan! Chwazi kantite lajan oswa mete pa w epi ede nou fè yon diferans.</p>
+    <form action="/create-checkout-session" method="POST" id="donationForm">
+      <select name="amount" id="amountSelect" required>
         <option value="500">$5 USD</option>
         <option value="1000">$10 USD</option>
         <option value="2000">$20 USD</option>
         <option value="5000">$50 USD</option>
-      </select><br>
+        <option value="custom">Lòt montan...</option>
+      </select>
+      <input type="number" id="customAmount" name="customAmount" min="1" step="1" placeholder="Antre montan an USD">
+      <br>
       <button class="btn-donate" type="submit">Fè donasyon kounya</button>
     </form>
     <div class="credit">
       © 2024 The Help &middot; Powered by Stripe
     </div>
   </div>
+  <script>
+    // JavaScript pou montre/maske chan "Lòt montan"
+    const amountSelect = document.getElementById('amountSelect');
+    const customInput = document.getElementById('customAmount');
+    const form = document.getElementById('donationForm');
+    amountSelect.addEventListener('change', function() {
+      if (this.value === 'custom') {
+        customInput.style.display = 'inline-block';
+        customInput.required = true;
+      } else {
+        customInput.style.display = 'none';
+        customInput.required = false;
+      }
+    });
+    // Pou asire form lan voye bon montan
+    form.addEventListener('submit', function(e) {
+      if (amountSelect.value === 'custom') {
+        let usd = parseFloat(customInput.value);
+        let value = Math.round(usd * 100); // Stripe mande an santim!
+        if (isNaN(value) || value < 100) { // $1 min
+          alert("Antre yon montan ki pi gran ke $1");
+          e.preventDefault();
+          return false;
+        }
+        // Ajiste valè ki voye a
+        amountSelect.value = value;
+      }
+    });
+  </script>
 </body>
 </html>
