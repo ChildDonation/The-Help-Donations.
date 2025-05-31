@@ -1,20 +1,6 @@
-const express = require('express');
-const path = require('path');
-const app = express();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-// Route for homepage
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Route for Stripe payment
 app.post('/create-checkout-session', async (req, res) => {
+  const amount = parseInt(req.body.amount); // ex: 500 = $5.00
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [{
@@ -23,7 +9,7 @@ app.post('/create-checkout-session', async (req, res) => {
         product_data: {
           name: 'Donation',
         },
-        unit_amount: 500, // $5.00
+        unit_amount: amount,
       },
       quantity: 1,
     }],
@@ -33,10 +19,4 @@ app.post('/create-checkout-session', async (req, res) => {
   });
 
   res.redirect(303, session.url);
-});
-
-// Launch the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
 });
