@@ -1,27 +1,42 @@
+const express = require('express');
+const path = require('path');
+const app = express();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.post('/create-checkout-session', async (req, res) => {
-  const amount = parseInt(req.body.amount, 10); // sa li soti nan form lan
+  const amount = parseInt(req.body.amount, 10);
 
-  try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: 'Donation',
-          },
-          unit_amount: amount,
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: 'Donation',
         },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: `${req.protocol}://${req.get('host')}/success.html`,
-      cancel_url: `${req.protocol}://${req.get('host')}/cancel.html`,
-    });
+        unit_amount: amount,
+      },
+      quantity: 1,
+    }],
+    mode: 'payment',
+    // KORIJAN: itilize backticks!
+    success_url: `${req.protocol}://${req.get('host')}/success.html`,
+    cancel_url: `${req.protocol}://${req.get('host')}/cancel.html`,
+  });
 
-    res.redirect(303, session.url);
-  } catch (err) {
-    console.error('Stripe session error:', err.message);
-    res.status(500).send('Error creating Stripe checkout session');
-  }
+  res.redirect(303, session.url);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  // KORIJAN: itilize backticks!
+  console.log(`Server is running on port ${PORT}`);
 });
