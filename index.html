@@ -1,43 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Open Donation - The Help</title>
-  <style>
-    /* ... (tout CSS ou a la) ... */
-  </style>
-</head>
-<body>
-  <div class="overlay">
-    <!-- Mete imaj la isit la -->
-    <img src="banner.jpg" alt="Banner" style="max-width: 100%; border-radius: 15px; margin-bottom: 20px;">
-    <h1>OPEN DONATION</h1>
-    <p>Choose an amount and make a secure donation via Stripe.</p>
-    <form action="/create-checkout-session" method="POST">
-      <select name="amount">
-        <option value="500">$5 USD</option>
-        <option value="1000">$10 USD</option>
-        <option value="2000">$20 USD</option>
-        <option value="5000">$50 USD</option>
-        <option value="500">$100 USD</option>
-        <option value="1000">$200 USD</option>
-        <option value="2000">$300 USD</option>
-        <option value="5000">$400 USD</option>
-        <option value="500">$500 USD</option>
-        <option value="1000">$600 USD</option>
-        <option value="2000">$700 USD</option>
-        <option value="5000">$800 USD</option>
-        <option value="500">$900 USD</option>
-        <option value="1000">$1000 USD</option>
-        <option value="2000">$1500 USD</option>
-        <option value="5000">$2000 USD</option>
-   </select><br>
-      <button class="btn-donate" type="submit">Donate Now</button>
-    </form>
-    <div class="credit">
-      All transactions are processed securely with Stripe.
-    </div>
-  </div>
-</body>
-</html>
+<form action="/create-checkout-session" method="POST" id="donationForm">
+  <select name="amount" id="amountSelect" required>
+    <option value="500">$5 USD</option>
+    <option value="1000">$10 USD</option>
+    <option value="2000">$20 USD</option>
+    <option value="5000">$50 USD</option>
+    <option value="custom">Lòt montan...</option>
+  </select>
+  <input type="number" id="customAmount" name="customAmount" min="1" step="1" placeholder="Antre montan an USD" style="display:none; margin-top:12px;">
+  <br>
+  <button class="btn-donate" type="submit">Fè donasyon kounya</button>
+</form>
+<script>
+  // JavaScript pou montre champ "custom amount" si "Lòt montan" chwazi
+  const amountSelect = document.getElementById('amountSelect');
+  const customInput = document.getElementById('customAmount');
+  const form = document.getElementById('donationForm');
+  amountSelect.addEventListener('change', function() {
+    if (this.value === 'custom') {
+      customInput.style.display = 'inline-block';
+      customInput.required = true;
+    } else {
+      customInput.style.display = 'none';
+      customInput.required = false;
+    }
+  });
+  // Pou asire form lan voye bon montan
+  form.addEventListener('submit', function(e) {
+    if (amountSelect.value === 'custom') {
+      // Montan Stripe vle, se an santim (pa dola!)
+      let value = Math.round(parseFloat(customInput.value) * 100);
+      if (isNaN(value) || value < 100) { // $1 min
+        alert("Antre yon montan ki pi gran ke $1");
+        e.preventDefault();
+        return false;
+      }
+      // Ajiste valè ki voye a
+      amountSelect.value = value;
+    }
+  });
+</script>
