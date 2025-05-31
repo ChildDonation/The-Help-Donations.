@@ -28,8 +28,8 @@ app.post('/create-checkout-session', async (req, res) => {
       quantity: 1,
     }],
     mode: 'payment',
-    success_url: ${req.protocol}://${req.get('host')}/success.html,
-    cancel_url: ${req.protocol}://${req.get('host')}/cancel.html,
+    success_url: `${req.protocol}://${req.get('host')}/success.html`,
+    cancel_url: `${req.protocol}://${req.get('host')}/cancel.html`,
   });
 
   res.redirect(303, session.url);
@@ -38,5 +38,5 @@ app.post('/create-checkout-session', async (req, res) => {
 // Launch the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log('Server is running on port ${PORT}');
+  console.log(`Server is running on port ${PORT}`);
 });
