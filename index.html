@@ -1,50 +1,31 @@
-const express = require('express');
-const path = require('path');
-const app = express();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
-// Middleware
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-// Route pou paj prensipal
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Route pou kreye Stripe session
-app.post('/create-checkout-session', async (req, res) => {
-  const amount = parseInt(req.body.amount, 10) || 500; // default $5
-
-  try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: 'Donation',
-          },
-          unit_amount: amount,
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      // KORIJAN ISIT: mete yo ant backticks (``) pou template literal la mache!
-      success_url: `${req.protocol}://${req.get('host')}/success.html`,
-      cancel_url: `${req.protocol}://${req.get('host')}/cancel.html`,
-    });
-
-    res.redirect(303, session.url);
-  } catch (err) {
-    console.error('Stripe session error:', err.message);
-    res.status(500).send('Error creating Stripe checkout session');
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  // KORIJAN ISIT TOU: mete ant backticks
-  console.log(`Server is running on port ${PORT}`);
-});
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Open Donation - The Help</title>
+  <style>
+    /* ... (tout CSS ou a la) ... */
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <!-- Mete imaj la isit la -->
+    <img src="banner.jpg" alt="Banner" style="max-width: 100%; border-radius: 15px; margin-bottom: 20px;">
+    <h1>OPEN DONATION</h1>
+    <p>Choose an amount and make a secure donation via Stripe.</p>
+    <form action="/create-checkout-session" method="POST">
+      <select name="amount">
+        <option value="500">$5 USD</option>
+        <option value="1000">$10 USD</option>
+        <option value="2000">$20 USD</option>
+        <option value="5000">$50 USD</option>
+      </select><br>
+      <button class="btn-donate" type="submit">Donate Now</button>
+    </form>
+    <div class="credit">
+      All transactions are processed securely with Stripe.
+    </div>
+  </div>
+</body>
+</html>
